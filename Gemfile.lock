@@ -1,0 +1,20 @@
+PATH
+  remote: .
+  specs:
+    active_touch (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    rake (10.4.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  active_touch!
+  bundler (~> 1.10)
+  rake (~> 10.0)
+
+BUNDLED WITH
+   1.10.6
