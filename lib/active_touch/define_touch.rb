@@ -24,7 +24,7 @@ module ActiveTouch
       @klass.send :define_method, @touch_method do |*args|
         changed_attributes = self.previous_changes.keys.map(&:to_sym)
 
-        if (options[:attributes] & changed_attributes).any?
+        if (options[:watch] & changed_attributes).any?
 
           if options[:async]
             TouchJob.perform_later(self, association.to_s, options[:after_touch].to_s)
@@ -44,7 +44,7 @@ module ActiveTouch
     def default_options
       {
           async: false,
-          attributes: @klass.column_names.map(&:to_sym),
+          watch: @klass.column_names.map(&:to_sym),
           after_touch: nil
       }
     end
