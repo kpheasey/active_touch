@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_touch (1.0.0)
+    activetouch (1.0.0)
       rails (>= 4.2)
 
 GEM
@@ -103,7 +103,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  active_touch!
+  activetouch!
   bundler (~> 1.10)
   rake (~> 10.0)
 
