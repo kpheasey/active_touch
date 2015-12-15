@@ -44,7 +44,7 @@ module ActiveTouch
     def default_options
       {
           async: false,
-          watch: @klass.column_names.map(&:to_sym),
+          watch: @klass.column_names.map(&:to_sym) - ActiveTouch.configuration.ignored_attributes,
           after_touch: nil
       }
     end
