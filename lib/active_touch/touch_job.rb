@@ -2,7 +2,11 @@ module ActiveTouch
   class TouchJob < ActiveJob::Base
 
     def perform(record, association, after_touch)
-      associated = record.send(association)
+      if association == 'self'
+        associated = record
+      else
+        associated = record.send(association)
+      end
 
       if associated.is_a? ActiveRecord::Base
         associated.update_columns(updated_at: record.updated_at)
