@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = ActiveTouch::VERSION
   spec.authors       = ['Kevin Pheasey']
   spec.email         = ['kevin@kpheasey.com']
+  spec.licenses      = ['MIT']
 
   spec.summary       = %q{A more robust touch for ActiveRecord associations.}
   spec.description   = %q{Touch specific associations when specific attributes change.  Call an optional method on those touched records.  Perform the touch synchronously or asynchronously.}
@@ -21,5 +22,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.10'
   spec.add_development_dependency 'rake', '~> 10.0'
 
-  spec.add_dependency 'rails', '>= 4.2'
+  spec.add_dependency 'rails', '~> 4.2'
 end

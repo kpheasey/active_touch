@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     activetouch (1.0.0)
-      rails (>= 4.2)
+      rails (~> 4.2)
 
 GEM
   remote: https://rubygems.org/
