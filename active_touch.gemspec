@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'active_touch/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'activetouch'
+  spec.name          = 'active_touch'
   spec.version       = ActiveTouch::VERSION
   spec.authors       = ['Kevin Pheasey']
   spec.email         = ['kevin@kpheasey.com']
