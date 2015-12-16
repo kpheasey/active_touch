@@ -23,8 +23,11 @@ module ActiveTouch
 
       @klass.send :define_method, @touch_method do |*args|
         changed_attributes = self.previous_changes.keys.map(&:to_sym)
+        watched_changes = (options[:watch] & changed_attributes)
 
-        if (options[:watch] & changed_attributes).any?
+        # watched values changed and conditional procs evaluate to true
+        if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
+          Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
 
           if options[:async]
             TouchJob.perform_later(self, association.to_s, options[:after_touch].to_s)
@@ -45,7 +48,9 @@ module ActiveTouch
       {
           async: false,
           watch: @klass.column_names.map(&:to_sym) - ActiveTouch.configuration.ignored_attributes,
-          after_touch: nil
+          after_touch: nil,
+          if: Proc.new { true },
+          unless: Proc.new { false }
       }
     end
 
