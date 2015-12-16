@@ -30,7 +30,10 @@ module ActiveTouch
           Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
 
           if options[:async]
-            TouchJob.perform_later(self, association.to_s, options[:after_touch].to_s)
+            TouchJob
+                .set(queue: ActiveTouch.configuration.queue)
+                .perform_later(self, association.to_s, options[:after_touch].to_s)
+
           else
             TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s)
           end
@@ -46,7 +49,7 @@ module ActiveTouch
 
     def default_options
       {
-          async: false,
+          async: ActiveTouch.configuration.async,
           watch: @klass.column_names.map(&:to_sym) - ActiveTouch.configuration.ignored_attributes,
           after_touch: nil,
           if: Proc.new { true },
