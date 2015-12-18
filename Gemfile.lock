@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_touch (1.2.1)
+    active_touch (1.4.0)
       rails (~> 4.2)
 
 GEM
