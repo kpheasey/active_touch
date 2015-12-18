@@ -14,7 +14,7 @@ gem 'activetouch', '~> 1.4.0'
 
 Then run the installer:
 
-```ruby
+```sh
 rails g active_touch:install
 ```
 
