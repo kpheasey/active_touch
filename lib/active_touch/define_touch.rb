@@ -15,6 +15,7 @@ module ActiveTouch
     def define
       define_touch_method
       add_active_record_callback
+      add_to_network
     end
 
     def define_touch_method
@@ -45,6 +46,11 @@ module ActiveTouch
     def add_active_record_callback
       touch_method = @touch_method
       @klass.send(:after_commit) { send(touch_method) }
+    end
+
+    def add_to_network
+      touched = @options[:class_name] || @association.to_s.camelize
+      ActiveTouch.network.add_touch(@klass.to_s, touched, @options[:watch])
     end
 
     def default_options
