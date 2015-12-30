@@ -13,10 +13,8 @@ module ActiveTouch
         associated.send(after_touch) unless after_touch.blank?
 
       elsif !associated.nil?
-        associated.each do |associate|
-          associate.update_columns(updated_at: record.updated_at)
-          associate.send(after_touch) unless after_touch.blank?
-        end
+        associated.update_all(updated_at: record.updated_at)
+        associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
       end
     end
 
