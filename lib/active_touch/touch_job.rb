@@ -10,18 +10,10 @@ module ActiveTouch
 
       elsif !associated.nil?
 
-        if is_async
-          # create a separate touch job for each associated record.
-          # this helps avoid deadlocks
-          associated.each do |associate|
-            TouchJob
-                .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(associate, 'self', after_touch, is_async)
-          end
-
-        else
-          associated.update_all(updated_at: record.updated_at)
-          associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
+        0.step(associated.count, ActiveTouch.configuration.batch_size).each do |offset|
+          batch = associated.offset(offset).limit(ActiveTouch.configuration.batch_size)
+          batch.update_all(updated_at: record.updated_at)
+          batch.each { |associate| associate.send(after_touch) } unless after_touch.blank?
         end
       end
     end

@@ -13,10 +13,11 @@ module ActiveTouch
   end
 
   class Configuration
-    attr_accessor :async, :ignored_attributes, :queue
+    attr_accessor :async, :batch_size, :ignored_attributes, :queue
 
     def initialize
       @async = false
+      @batch_size = 100
       @ignored_attributes = [:updated_at]
       @queue = 'default'
     end
