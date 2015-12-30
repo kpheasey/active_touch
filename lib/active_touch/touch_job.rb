@@ -1,7 +1,7 @@
 module ActiveTouch
   class TouchJob < ActiveJob::Base
 
-    def perform(record, association, after_touch, is_async = false)
+    def perform(record, association, after_touch, is_async = ActiveTouch.configuration.async)
       associated = association == 'self' ? record : record.send(association)
 
       if associated.is_a? ActiveRecord::Base
