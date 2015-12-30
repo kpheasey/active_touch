@@ -33,10 +33,10 @@ module ActiveTouch
           if options[:async]
             TouchJob
                 .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(self, association.to_s, options[:after_touch].to_s)
+                .perform_later(self, association.to_s, options[:after_touch].to_s, true)
 
           else
-            TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s)
+            TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, false)
           end
 
         end
