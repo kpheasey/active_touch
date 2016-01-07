@@ -2,7 +2,7 @@ module ActiveTouch
   class DefineTouch
 
     def self.on(klass, association, options)
-      new(klass, association, options).define
+      new(klass, association, options).define if ActiveRecord::Base.connection.table_exists?(klass.table_name)
     end
 
     def initialize(klass, association, options)
