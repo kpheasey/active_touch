@@ -10,27 +10,28 @@ module ActiveTouch
 
       elsif !associated.nil?
 
-        # batch processing
-        if ActiveTouch.configuration.batch_process
-          0.step(associated.count, ActiveTouch.configuration.batch_size).each do |offset|
-            batch = associated.offset(offset).limit(ActiveTouch.configuration.batch_size)
-            batch.update_all(updated_at: record.updated_at)
-            batch.each { |associate| associate.send(after_touch) } unless after_touch.blank?
-          end
+        case ActiveTouch.configuration.touch_process
 
-        # non batch asynchronous processing
-        elsif is_async
-          associated.each do |associate|
-            TouchJob
-                .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(associate, 'self', after_touch, is_async)
-          end
+          when :batch_synchronous
+            0.step(associated.count, ActiveTouch.configuration.batch_size).each do |offset|
+              batch = associated.offset(offset).limit(ActiveTouch.configuration.batch_size)
+              batch.update_all(updated_at: record.updated_at)
+              batch.each { |associate| associate.send(after_touch) } unless after_touch.blank?
+            end
 
-        # non batch / non asynchronous processing
-        else
-          associated.update_all(updated_at: record.updated_at)
-          associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
+          when :non_batch_asynchronous
+            associated.each do |associate|
+              TouchJob
+                  .set(
+                      queue: ActiveTouch.configuration.queue,
+                      wait: ActiveTouch.configuration.associated_touch_delay.seconds
+                  )
+                  .perform_later(associate, 'self', after_touch, is_async)
+            end
 
+          when :non_batch_synchronous
+            associated.update_all(updated_at: record.updated_at)
+            associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
         end
       end
     end
