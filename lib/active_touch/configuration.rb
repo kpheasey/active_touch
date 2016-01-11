@@ -13,17 +13,13 @@ module ActiveTouch
   end
 
   class Configuration
-    attr_accessor :associated_touch_delay, :async, :batch_process, :batch_size, :ignored_attributes,
-                  :queue, :touch_process
+    attr_accessor :async, :ignored_attributes, :queue, :timestamp_attribute
 
     def initialize
-      @associated_touch_delay = 0
       @async = false
-      @batch_process = true
-      @batch_size = 100
       @ignored_attributes = [:updated_at]
       @queue = 'default'
-      @touch_process = :batch_synchronous
+      @timestamp_attribute = :updated_at
     end
   end
 

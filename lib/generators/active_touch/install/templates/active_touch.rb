@@ -3,14 +3,6 @@ ActiveTouch.configure do |config|
   # Default is false
   # config.async = false
 
-  # Enable batch processing for large groups of records
-  # Default is false
-  # config.batch_processing = false
-
-  # Batch size of records to touch at a time
-  # Default is 100
-  # config.batch_size = 100
-
   # When :watch is not specified, ignore the following attributes.
   # Default is [:updated_at]
   # config.ignored_attributes = [:updated_at]
@@ -18,4 +10,8 @@ ActiveTouch.configure do |config|
   # Job queue for asynchronous jobs.
   # Default is 'default'
   # config.queue = 'default'
+
+  # Timestamp attribute to update when touched
+  # Default is :updated_at
+  # config.timestamp_attribute = 'default'
 end
