@@ -80,6 +80,7 @@ NOTE: The default is `async: false`
 
 There are a few options that you can change by updating `config/initializers/active_touch.rb`.
 
-- `async`: Define a default for all touches to run asynchronously by setting this to true.
-- `ignored_attributes`: When no `watch` argument is supplied, all attribute changes can trigger a touch.  Define a default list of ignored attributes here.  Default is `:updated_at`.
+- `async`: Default to asynchronous touches
+- `ignored_attributes`: When no `watch` argument is supplied, all attribute changes can trigger a touch.  Define a default list of ignored attributes here.  Default is `[:updated_a]t`.
 - `queue`: Specify which queue to put asynchronous jobs in.
+- `timestamp_attribute`: The timestamp attribute that is updated by a touch, default is  `:updated_at`.  You can set this to `nil` if you don't want to update any timestamp.
