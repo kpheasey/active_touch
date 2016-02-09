@@ -13,5 +13,5 @@ ActiveTouch.configure do |config|
 
   # Timestamp attribute to update when touched
   # Default is :updated_at
-  # config.timestamp_attribute = 'default'
+  # config.timestamp_attribute = :updated_at
 end
