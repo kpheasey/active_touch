@@ -11,20 +11,25 @@ module ActiveTouch
       @klass = klass
       @association = association
       @options = default_options.merge(options)
-      @touch_method = "touch_#{SecureRandom.uuid}"
+      @update_touch_method = "touch_#{SecureRandom.uuid}"
+      @destroy_touch_method = "touch_#{SecureRandom.uuid}"
     end
 
     def define
-      define_touch_method
-      add_active_record_callback
+      define_update_touch_method
+      add_active_record_callback(@update_touch_method)
+
+      define_destroy_touch_method
+      add_active_record_callback(@destroy_touch_method)
+
       add_to_network
     end
 
-    def define_touch_method
+    def define_update_touch_method
       association = @association
       options = @options
 
-      @klass.send :define_method, @touch_method do |*args|
+      @klass.send :define_method, @update_touch_method do |*args|
         changed_attributes = self.previous_changes.keys.map(&:to_sym)
         watched_changes = (options[:watch] & changed_attributes)
 
@@ -35,19 +40,28 @@ module ActiveTouch
           if options[:async]
             TouchJob
                 .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(self, association.to_s, options[:after_touch].to_s, true)
+                .perform_later(self, association.to_s, options[:after_touch].to_s)
 
           else
-            TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, false)
+            TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s)
           end
 
         end
       end
     end
 
-    def add_active_record_callback
-      touch_method = @touch_method
-      @klass.send(:after_commit) { send(touch_method) }
+    def define_destroy_touch_method
+      association = @association
+      options = @options
+
+      @klass.send :define_method, @destroy_touch_method do |*args|
+        Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to destroy"
+        TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, true)
+      end
+    end
+
+    def add_active_record_callback(method)
+      @klass.send(:after_commit) { send(method) }
     end
 
     def add_to_network
