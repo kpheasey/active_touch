@@ -9,7 +9,7 @@ A more robust touch for ActiveRecord associations.
 Add the gem to your Gemfile:
 
 ```ruby
-gem 'activetouch', '~> 3.0.3'
+gem 'activetouch', '~> 4.0'
 ```
 
 Then run the installer:
