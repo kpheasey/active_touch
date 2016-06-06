@@ -17,10 +17,10 @@ module ActiveTouch
 
     def define
       define_update_touch_method
-      add_active_record_callback(@update_touch_method)
+      add_active_record_callback(:after_commit, @update_touch_method)
 
       define_destroy_touch_method
-      add_active_record_callback(@destroy_touch_method)
+      add_active_record_callback(:after_destroy, @destroy_touch_method)
 
       add_to_network
     end
@@ -60,8 +60,8 @@ module ActiveTouch
       end
     end
 
-    def add_active_record_callback(method)
-      @klass.send(:after_commit) { send(method) }
+    def add_active_record_callback(event, method)
+      @klass.send(event) { send(method) }
     end
 
     def add_to_network
