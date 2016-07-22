@@ -2,7 +2,7 @@ module ActiveTouch
   class DefineTouch
 
     def self.on(klass, association, options)
-      new(klass, association, options).define if ActiveRecord::Base.connection.table_exists?(klass.table_name)
+      new(klass, association, options).define if ActiveRecord::Base.connection.data_source_exists?(klass.table_name)
     rescue ActiveRecord::NoDatabaseError
       # do nothing
     end
