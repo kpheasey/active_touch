@@ -13,7 +13,7 @@ module ActiveTouch
       @options = default_options.merge(options)
       @before_commit_method = "touch_#{SecureRandom.uuid}"
       @after_commit_method = "touch_#{SecureRandom.uuid}"
-      @destroy_touch_method = "touch_#{SecureRandom.uuid}"
+      @before_destroy_method = "touch_#{SecureRandom.uuid}"
     end
 
     def define
@@ -27,8 +27,8 @@ module ActiveTouch
         add_active_record_callback(:after_commit, @after_commit_method)
       end
 
-      define_destroy_touch_method
-      add_active_record_callback(:after_destroy, @destroy_touch_method)
+      define_before_destroy
+      add_active_record_callback(:after_destroy, @before_destroy_method)
 
       add_to_network
     end
@@ -43,7 +43,7 @@ module ActiveTouch
 
         # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
-          Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          Rails.logger.debug "Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
           TouchJob.perform_now(self, association.to_s)
         end
       end
@@ -59,7 +59,7 @@ module ActiveTouch
 
         # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
-          Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          Rails.logger.debug "Touch After Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
 
           if options[:async]
             TouchJob
@@ -74,12 +74,12 @@ module ActiveTouch
       end
     end
 
-    def define_destroy_touch_method
+    def define_before_destroy
       association = @association
       options = @options
 
-      @klass.send :define_method, @destroy_touch_method do |*args|
-        Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to destroy"
+      @klass.send :define_method, @before_destroy_method do |*args|
+        Rails.logger.debug "Touch Before Destroy: #{self.class}(#{self.id}) => #{association} due to destroy"
         TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, true)
       end
     end
