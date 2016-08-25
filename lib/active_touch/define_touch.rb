@@ -44,7 +44,7 @@ module ActiveTouch
         # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
           Rails.logger.debug "Touch: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
-          TouchJob.perform_now(self, association.to_s, nil, false, options[:touch_in_transaction])
+          TouchJob.perform_now(self, association.to_s)
         end
       end
     end
