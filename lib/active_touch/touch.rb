@@ -1,29 +1,26 @@
 module ActiveTouch
   class Touch
 
-    attr_accessor :record, :association, :after_touch, :is_destroy, :is_touched
+    attr_accessor :record, :association, :after_touch, :is_destroy, :is_touched, :touch_updates
 
-    def initialize(record, association, after_touch, is_destroy = false, is_touched = false)
+    def initialize(record, association, options = {})
       @record = record
       @association = association
-      @after_touch = after_touch
-      @is_destroy = is_destroy
-      @is_touched = is_touched
+      @after_touch = options[:after_touch]
+      @is_destroy = options[:is_destroy]
+      @is_touched = options[:is_touched]
+      @touch_updates = (options[:touch_updates] || {})
     end
 
     def run
-      if associated.is_a? ActiveRecord::Base
-        if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
-          associated.update_columns(ActiveTouch.configuration.timestamp_attribute => record.updated_at)
-        end
+      touch_updates[ActiveTouch.configuration.timestamp_attribute] = record.updated_at
 
+      if associated.is_a? ActiveRecord::Base
+        associated.update_columns(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
         associated.send(after_touch) unless after_touch.blank?
 
       elsif !associated.nil? && !associated.empty?
-        if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
-          associated.update_all(ActiveTouch.configuration.timestamp_attribute => record.updated_at)
-        end
-
+        associated.update_all(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
         associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
       end
     end

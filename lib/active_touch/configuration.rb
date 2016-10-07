@@ -13,7 +13,7 @@ module ActiveTouch
   end
 
   class Configuration
-    attr_accessor :async, :ignored_attributes, :queue, :timestamp_attribute, :touch_in_transaction
+    attr_accessor :async, :ignored_attributes, :queue, :timestamp_attribute, :touch_in_transaction, :touch_updates
 
     def initialize
       @async = false
@@ -21,6 +21,7 @@ module ActiveTouch
       @queue = 'default'
       @timestamp_attribute = :updated_at
       @touch_in_transaction = true
+      @touch_updates = {}
     end
   end
 

@@ -44,7 +44,7 @@ module ActiveTouch
         # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
           Rails.logger.debug "Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
-          TouchJob.perform_now(self, association.to_s)
+          TouchJob.perform_now(self, association.to_s, touch_updates: options[:touch_updates])
         end
       end
     end
@@ -64,10 +64,20 @@ module ActiveTouch
           if options[:async]
             TouchJob
                 .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(self, association.to_s, options[:after_touch].to_s, false, options[:touch_in_transaction])
+                .perform_later(self, association.to_s, {
+                    after_touch: options[:after_touch].to_s,
+                    is_destroy: false,
+                    is_touched: options[:touch_in_transaction],
+                    touch_updates: options[:touch_updates]
+                })
 
           else
-            TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, false, options[:touch_in_transaction])
+            TouchJob.perform_now(self, association.to_s, {
+                after_touch: options[:after_touch].to_s,
+                is_destroy: false,
+                is_touched: options[:touch_in_transaction],
+                touch_updates: options[:touch_updates]
+            })
           end
 
         end
@@ -80,7 +90,11 @@ module ActiveTouch
 
       @klass.send :define_method, @before_destroy_method do |*args|
         Rails.logger.debug "Touch Before Destroy: #{self.class}(#{self.id}) => #{association} due to destroy"
-        TouchJob.perform_now(self, association.to_s, options[:after_touch].to_s, true)
+        TouchJob.perform_now(self, association.to_s, {
+            after_touch: options[:after_touch].to_s,
+            is_destroy: true,
+            touch_updates: options[:touch_updates]
+        })
       end
     end
 
@@ -100,7 +114,8 @@ module ActiveTouch
           watch: @klass.column_names.map(&:to_sym) - ActiveTouch.configuration.ignored_attributes,
           after_touch: nil,
           if: Proc.new { true },
-          unless: Proc.new { false }
+          unless: Proc.new { false },
+          touch_updates: ActiveTouch.configuration.touch_updates
       }
     end
 
