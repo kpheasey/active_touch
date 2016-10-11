@@ -28,7 +28,7 @@ module ActiveTouch
     def associated
       @associated ||= begin
         if association == 'self'
-          is_destroy ? nil : record
+          is_destroy || record.destroyed? ? nil : record
         else
           record.send(association)
         end

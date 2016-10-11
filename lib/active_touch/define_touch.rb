@@ -28,7 +28,7 @@ module ActiveTouch
       end
 
       define_before_destroy
-      add_active_record_callback(:after_destroy, @before_destroy_method)
+      add_active_record_callback(:before_destroy, @before_destroy_method, prepend: true)
 
       add_to_network
     end
@@ -98,8 +98,8 @@ module ActiveTouch
       end
     end
 
-    def add_active_record_callback(event, method)
-      @klass.send(event) { send(method) }
+    def add_active_record_callback(event, method, args = {})
+      @klass.send(event) { send(method, args) }
     end
 
     def add_to_network
