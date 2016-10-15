@@ -41,10 +41,9 @@ module ActiveTouch
         changed_attributes = self.previous_changes.keys.map(&:to_sym)
         watched_changes = (options[:watch] & changed_attributes)
 
-        # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
-          Rails.logger.debug "Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
           TouchJob.perform_now(self, association.to_s, touch_updates: options[:touch_updates])
+          Rails.logger.debug "Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
         end
       end
     end
@@ -57,27 +56,19 @@ module ActiveTouch
         changed_attributes = self.previous_changes.keys.map(&:to_sym)
         watched_changes = (options[:watch] & changed_attributes)
 
-        # watched values changed and conditional procs evaluate to true
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
           Rails.logger.debug "Touch After Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          options = {
+              after_touch: options[:after_touch].to_s,
+              is_destroy: false,
+              is_touched: options[:touch_in_transaction],
+              touch_updates: options[:touch_updates]
+          }
 
           if options[:async]
-            TouchJob
-                .set(queue: ActiveTouch.configuration.queue)
-                .perform_later(self, association.to_s, {
-                    after_touch: options[:after_touch].to_s,
-                    is_destroy: false,
-                    is_touched: options[:touch_in_transaction],
-                    touch_updates: options[:touch_updates]
-                })
-
+            TouchJob.set(queue: ActiveTouch.configuration.queue).perform_later(self, association.to_s, options)
           else
-            TouchJob.perform_now(self, association.to_s, {
-                after_touch: options[:after_touch].to_s,
-                is_destroy: false,
-                is_touched: options[:touch_in_transaction],
-                touch_updates: options[:touch_updates]
-            })
+            TouchJob.perform_now(self, association.to_s, options)
           end
 
         end
