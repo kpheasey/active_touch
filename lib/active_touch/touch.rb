@@ -13,14 +13,16 @@ module ActiveTouch
     end
 
     def run
-      touch_updates[ActiveTouch.configuration.timestamp_attribute] = record.updated_at
+      if !ActiveTouch.configuration.timestamp_attribute.nil?
+        touch_updates[ActiveTouch.configuration.timestamp_attribute] = record.updated_at
+      end
 
       if associated.is_a? ActiveRecord::Base
-        associated.update_columns(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
+        associated.update_columns(touch_updates) if !touch_updates.empty? && !is_touched
         associated.send(after_touch) unless after_touch.blank?
 
       elsif !associated.nil?
-        associated.update_all(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
+        associated.update_all(touch_updates) if !touch_updates.empty? && !is_touched
         associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
       end
     end
