@@ -19,7 +19,7 @@ module ActiveTouch
         associated.update_columns(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
         associated.send(after_touch) unless after_touch.blank?
 
-      elsif !associated.nil? && !associated.empty?
+      elsif !associated.nil?
         associated.update_all(touch_updates) if !ActiveTouch.configuration.timestamp_attribute.nil? && !is_touched
         associated.each { |associate| associate.send(after_touch) } unless after_touch.blank?
       end
