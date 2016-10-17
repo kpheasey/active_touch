@@ -58,7 +58,7 @@ module ActiveTouch
 
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
           Rails.logger.debug "Touch After Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
-          options = {
+          job_options = {
               after_touch: options[:after_touch].to_s,
               is_destroy: false,
               is_touched: options[:touch_in_transaction],
@@ -66,9 +66,9 @@ module ActiveTouch
           }
 
           if options[:async]
-            TouchJob.set(queue: ActiveTouch.configuration.queue).perform_later(self, association.to_s, options)
+            TouchJob.set(queue: ActiveTouch.configuration.queue).perform_later(self, association.to_s, job_options)
           else
-            TouchJob.perform_now(self, association.to_s, options)
+            TouchJob.perform_now(self, association.to_s, job_options)
           end
 
         end
