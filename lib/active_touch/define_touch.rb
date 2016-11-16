@@ -42,8 +42,8 @@ module ActiveTouch
         watched_changes = (options[:watch] & changed_attributes)
 
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
-          TouchJob.perform_now(self, association.to_s, touch_updates: options[:touch_updates])
-          Rails.logger.debug "Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          Rails.logger.debug "  Touch Before Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          Touch.new(self, association.to_s, touch_updates: options[:touch_updates]).perform
         end
       end
     end
@@ -57,7 +57,7 @@ module ActiveTouch
         watched_changes = (options[:watch] & changed_attributes)
 
         if watched_changes.any? && options[:if].call(self) && !options[:unless].call(self)
-          Rails.logger.debug "Touch After Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
+          Rails.logger.debug "  Touch After Commit: #{self.class}(#{self.id}) => #{association} due to changes in #{watched_changes}"
           job_options = {
               after_touch: options[:after_touch].to_s,
               is_destroy: false,
@@ -68,7 +68,7 @@ module ActiveTouch
           if options[:async]
             TouchJob.set(queue: ActiveTouch.configuration.queue).perform_later(self, association.to_s, job_options)
           else
-            TouchJob.perform_now(self, association.to_s, job_options)
+            Touch.new(self, association.to_s, job_options).perform
           end
 
         end
@@ -80,12 +80,12 @@ module ActiveTouch
       options = @options
 
       @klass.send :define_method, @before_destroy_method do |*args|
-        Rails.logger.debug "Touch Before Destroy: #{self.class}(#{self.id}) => #{association} due to destroy"
-        TouchJob.perform_now(self, association.to_s, {
+        Rails.logger.debug "  Touch Before Destroy: #{self.class}(#{self.id}) => #{association} due to destroy"
+        Touch.new(self, association.to_s, {
             after_touch: options[:after_touch].to_s,
             is_destroy: true,
             touch_updates: options[:touch_updates]
-        })
+        }).perform
       end
     end
 
